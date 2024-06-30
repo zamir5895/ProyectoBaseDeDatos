@@ -12,9 +12,9 @@ CREATE TABLE IF NOT EXISTS Usuario(
     direccion VARCHAR(50) NOT NULL
     );
 CREATE TABLE IF NOT EXISTS Viajero(
-                                      ID SERIAL PRIMARY KEY,
-                                      FOREIGN KEY (ID) REFERENCES Usuario(ID)
-    );
+    ID SERIAL PRIMARY KEY,
+    FOREIGN KEY (ID) REFERENCES Usuario(ID)
+);
 CREATE TABLE IF NOT EXISTS Arrendador(
                                          ID SERIAL PRIMARY KEY,
                                          FOREIGN KEY (ID) REFERENCES Usuario(ID)
