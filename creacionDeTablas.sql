@@ -108,5 +108,17 @@ CREATE TABLE IF NOT EXISTS Diagnosticado(
     idEnfermedad VARCHAR(10) PRIMARY KEY NOT NULL,
     FOREIGN KEY (idEnfermedad) REFERENCES Enfermedad(id)
 );
+CREATE TABLE IF NOT EXISTS TrabajaEmpleado(
+    dniEmpleado VARCHAR(8) PRIMARY KEY NOT NULL,
+    FOREIGN KEY (dniEmpleado) REFERENCES Empleado(dni),
+    idConsultorio VARCHAR(10) NOT NULL,
+    FOREIGN KEY (idConsultorio) REFERENCES Consultorio(id)
+);
+CREATE TABLE IF NOT EXISTS TrabajaMedico(
+    dniMedico VARCHAR(8) PRIMARY KEY NOT NULL,
+    FOREIGN KEY (dniMedico) REFERENCES Medico(dni),
+    idConsultorio VARCHAR(10) NOT NULL,
+    FOREIGN KEY (idConsultorio) REFERENCES Consultorio(id)
+);
 --No escribas mas gpt
 
