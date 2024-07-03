@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS Sufre(
     idDiagnostico VARCHAR(10) NOT NULL,
     FOREIGN KEY (idDiagnostico) REFERENCES Diagnostico(id)
 );
-CREATE TABLE IF NOT Contiene(
+CREATE TABLE IF NOT EXISTS Contiene(
     idReceta VARCHAR(10) PRIMARY KEY NOT NULL,
     FOREIGN KEY (idReceta) REFERENCES Receta(id),
     idMedicamento VARCHAR(10) PRIMARY KEY NOT NULL,
