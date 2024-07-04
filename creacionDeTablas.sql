@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS Persona(
-    dni VARCHAR(8) PRIMARY KEY,
+    dni VARCHAR(7) PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
     apellido VARCHAR(50) NOT NULL,
     edad INTEGER NOT NULL,
@@ -9,18 +9,18 @@ CREATE TABLE IF NOT EXISTS Persona(
     fechaNacimiento DATE NOT NULL
 );
 CREATE TABLE IF NOT EXISTS Empleado(
-    dni VARCHAR(8) PRIMARY KEY,
+    dni VARCHAR(7) PRIMARY KEY,
     FOREIGN KEY (dni) REFERENCES Persona(dni),
     cargo VARCHAR(50) NOT NULL,
     sueldo DECIMAL NOT NULL
 );
 CREATE TABLE IF NOT EXISTS Medico(
-    dni VARCHAR(8) PRIMARY KEY,
+    dni VARCHAR(7) PRIMARY KEY,
     FOREIGN KEY (dni) REFERENCES Persona(dni),
     añoEgreso DATE NOT NULL
 );
 CREATE TABLE IF NOT EXISTS Paciente(
-    dni VARCHAR(8) PRIMARY KEY,
+    dni VARCHAR(7) PRIMARY KEY,
     FOREIGN KEY (dni) REFERENCES Persona(dni),
     nroSeguro VARCHAR(50) NOT NULL
 );
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS Especialidad(
     descripcion VARCHAR(50) NOT NULL
 );
 CREATE TABLE IF NOT EXISTS Tiene(
-    dniMedico VARCHAR(8) NOT NULL,
+    dniMedico VARCHAR(7) NOT NULL,
     FOREIGN KEY (dniMedico) REFERENCES Medico(dni),
     idEspecialidad VARCHAR(10) NOT NULL,
     FOREIGN KEY (idEspecialidad) REFERENCES Especialidad(id),
@@ -59,48 +59,45 @@ CREATE TABLE IF NOT EXISTS Medicamento(
     generico BOOLEAN NOT NULL,
     fechaVencimiento DATE NOT NULL,
     precio FLOAT NOT NULL,
+    stock INTEGER NOT NULL,
     fechaFabricacion DATE NOT NULL
 );
 CREATE TABLE IF NOT EXISTS Receta(
-    id VARCHAR(10) PRIMARY KEY,
+    id VARCHAR(10) ,
     fecha DATE NOT NULL,
-    dniMedico VARCHAR(8) NOT NULL,
+    dniMedico VARCHAR(7) NOT NULL,
     FOREIGN KEY (dniMedico) REFERENCES Medico(dni),
-    dniPaciente VARCHAR(8) NOT NULL,
+    dniPaciente VARCHAR(7) NOT NULL,
     FOREIGN KEY (dniPaciente) REFERENCES Paciente(dni),
-    idConsultorio VARCHAR(10) NOT NULL,
-    FOREIGN KEY (idConsultorio) REFERENCES Consultorio(id)
+    descripcion VARCHAR(50) NOT NULL,
+    PRIMARY KEY (id, dniMedico, dniPaciente)
 );
 CREATE TABLE IF NOT EXISTS Cita(
-    id VARCHAR(10) PRIMARY KEY,
+    id VARCHAR(10),
     fecha DATE NOT NULL,
     hora TIME NOT NULL,
     idConsultorio VARCHAR(10) NOT NULL,
     FOREIGN KEY (idConsultorio) REFERENCES Consultorio(id),
-    dniMedico VARCHAR(8) NOT NULL,
+    dniMedico VARCHAR(7) NOT NULL,
     FOREIGN KEY (dniMedico) REFERENCES Medico(dni),
-    dniPaciente VARCHAR(8) NOT NULL,
-    FOREIGN KEY (dniPaciente) REFERENCES Paciente(dni)
+    dniPaciente VARCHAR(7) NOT NULL,
+    FOREIGN KEY (dniPaciente) REFERENCES Paciente(dni),
+    PRIMARY KEY (id, dniMedico, dniPaciente, idConsultorio)
 );
 CREATE TABLE IF NOT EXISTS Diagnostico(
-    id VARCHAR(10) PRIMARY KEY,
-    fecha DATE NOT NULL,
-    dniMedico VARCHAR(8) NOT NULL,
+    id VARCHAR(10) ,
+    dniMedico VARCHAR(7) NOT NULL,
     FOREIGN KEY (dniMedico) REFERENCES Medico(dni),
-    dniPaciente VARCHAR(8) NOT NULL,
+    dniPaciente VARCHAR(7) NOT NULL,
     FOREIGN KEY (dniPaciente) REFERENCES Paciente(dni),
     idCita VARCHAR(10) NOT NULL,
     FOREIGN KEY (idCita) REFERENCES Cita(id),
     idConsultorio VARCHAR(10) NOT NULL,
-    FOREIGN KEY (idConsultorio) REFERENCES Consultorio(id)
+    FOREIGN KEY (idConsultorio) REFERENCES Consultorio(id),
+    PRIMARY KEY (id, dniMedico, dniPaciente, idCita, idConsultorio)
+
 );
-CREATE TABLE IF NOT EXISTS Sufre(
-    idEnfermedad VARCHAR(10) NOT NULL,
-    FOREIGN KEY (idEnfermedad) REFERENCES Enfermedad(id),
-    dniPaciente VARCHAR(10) NOT NULL,
-    FOREIGN KEY (dniPaciente) REFERENCES Paciente(dni),
-    PRIMARY KEY (idEnfermedad, dniPaciente)
-);
+
 CREATE TABLE IF NOT EXISTS Contiene (
     idReceta VARCHAR(10) NOT NULL,
     FOREIGN KEY (idReceta) REFERENCES Receta(id),
@@ -115,20 +112,27 @@ CREATE TABLE IF NOT EXISTS Diagnosticado (
     FOREIGN KEY (idDiagnostico) REFERENCES Diagnostico(id),
     idEnfermedad VARCHAR(10) NOT NULL,
     FOREIGN KEY (idEnfermedad) REFERENCES Enfermedad(id),
-    PRIMARY KEY (idDiagnostico, idEnfermedad)
+    idConsultorio VARCHAR(10) NOT NULL,
+    FOREIGN KEY (idConsultorio) REFERENCES Consultorio(id),
+    idPaciente VARCHAR(7) NOT NULL,
+    FOREIGN KEY (idPaciente) REFERENCES Paciente(dni),
+    idMedico VARCHAR(7) NOT NULL,
+    FOREIGN KEY (idMedico) REFERENCES Medico(dni),
+    PRIMARY KEY (idDiagnostico, idEnfermedad, idConsultorio, idPaciente, idMedico)
 );
 
 CREATE TABLE IF NOT EXISTS TrabajaEmpleado(
-    dniEmpleado VARCHAR(8) PRIMARY KEY NOT NULL,
+    dniEmpleado VARCHAR(7) PRIMARY KEY NOT NULL,
     FOREIGN KEY (dniEmpleado) REFERENCES Empleado(dni),
     idConsultorio VARCHAR(10) NOT NULL,
     FOREIGN KEY (idConsultorio) REFERENCES Consultorio(id)
 );
 CREATE TABLE IF NOT EXISTS TrabajaMedico(
-    dniMedico VARCHAR(8) PRIMARY KEY NOT NULL,
+    dniMedico VARCHAR(7) NOT NULL,
     FOREIGN KEY (dniMedico) REFERENCES Medico(dni),
     idConsultorio VARCHAR(10) NOT NULL,
-    FOREIGN KEY (idConsultorio) REFERENCES Consultorio(id)
+    FOREIGN KEY (idConsultorio) REFERENCES Consultorio(id),
+    PRIMARY KEY (dniMedico, idConsultorio)
 );
 --No escribas mas gpt
 
