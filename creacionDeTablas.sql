@@ -26,11 +26,17 @@ CREATE TABLE IF NOT EXISTS Paciente(
 );
 CREATE TABLE IF NOT EXISTS Especialidad(
     id VARCHAR(10) PRIMARY KEY,
-    dni VARCHAR(8) NOT NULL,
-    FOREIGN KEY (dni) REFERENCES Medico(dni),
     nombre VARCHAR(50) NOT NULL,
     descripcion VARCHAR(50) NOT NULL
 );
+CREATE TABLE IF NOT EXISTS Tiene(
+    dniMedico VARCHAR(8) NOT NULL,
+    FOREIGN KEY (dniMedico) REFERENCES Medico(dni),
+    idEspecialidad VARCHAR(10) NOT NULL,
+    FOREIGN KEY (idEspecialidad) REFERENCES Especialidad(id),
+    PRIMARY KEY (dniMedico, idEspecialidad)
+);
+
 CREATE TABLE IF NOT EXISTS Consultorio(
     id VARCHAR(10) PRIMARY KEY,
     capacidad INTEGER NOT NULL,
@@ -92,22 +98,27 @@ CREATE TABLE IF NOT EXISTS Diagnostico(
 CREATE TABLE IF NOT EXISTS Sufre(
     idEnfermedad VARCHAR(10) NOT NULL,
     FOREIGN KEY (idEnfermedad) REFERENCES Enfermedad(id),
-    idDiagnostico VARCHAR(10) NOT NULL,
-    FOREIGN KEY (idDiagnostico) REFERENCES Diagnostico(id)
+    dniPaciente VARCHAR(10) NOT NULL,
+    FOREIGN KEY (dniPaciente) REFERENCES Paciente(dni),
+    PRIMARY KEY (idEnfermedad, dniPaciente)
 );
-CREATE TABLE IF NOT EXISTS Contiene(
-    idReceta VARCHAR(10) PRIMARY KEY NOT NULL,
+CREATE TABLE IF NOT EXISTS Contiene (
+    idReceta VARCHAR(10) NOT NULL,
     FOREIGN KEY (idReceta) REFERENCES Receta(id),
-    idMedicamento VARCHAR(10) PRIMARY KEY NOT NULL,
+    idMedicamento VARCHAR(10) NOT NULL,
     FOREIGN KEY (idMedicamento) REFERENCES Medicamento(id),
-    cantidad INTEGER NOT NULL
+    cantidad INTEGER NOT NULL,
+    PRIMARY KEY (idReceta, idMedicamento)
 );
-CREATE TABLE IF NOT EXISTS Diagnosticado(
-    idDiagnostico VARCHAR(10) PRIMARY KEY NOT NULL,
+
+CREATE TABLE IF NOT EXISTS Diagnosticado (
+    idDiagnostico VARCHAR(10) NOT NULL,
     FOREIGN KEY (idDiagnostico) REFERENCES Diagnostico(id),
-    idEnfermedad VARCHAR(10) PRIMARY KEY NOT NULL,
-    FOREIGN KEY (idEnfermedad) REFERENCES Enfermedad(id)
+    idEnfermedad VARCHAR(10) NOT NULL,
+    FOREIGN KEY (idEnfermedad) REFERENCES Enfermedad(id),
+    PRIMARY KEY (idDiagnostico, idEnfermedad)
 );
+
 CREATE TABLE IF NOT EXISTS TrabajaEmpleado(
     dniEmpleado VARCHAR(8) PRIMARY KEY NOT NULL,
     FOREIGN KEY (dniEmpleado) REFERENCES Empleado(dni),
