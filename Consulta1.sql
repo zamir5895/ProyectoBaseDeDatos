@@ -1,69 +1,45 @@
+
+--Cuáles médicos han diagnosticado enfermedades que han sido diagnosticadas
+-- más de cinco veces en el año 2022, cuántas consultas han realizado
+-- y cuáles son los nombres de los pacientes y las enfermedades asociadas
+--Ayuda a analizar los patrones de diagnóstico de enfermedades en el año 2022,
+--y asi asignar asignar recursos eficientemente, evaluar la calidad de atención,
 SELECT
+    med.dni AS "DNI del Médico",
     p.nombre AS "Nombre del Paciente",
-    p.apellido AS "Apellido del Paciente",
-    e.nombre AS "Enfermedad",
-    m.nombre AS "Medicamento",
-    med.nombre AS "Nombre del Medico",
-    med.apellido AS "Apellido del Medico",
-    esp.nombre AS "Especialidad del Medico",
-    c.fecha AS "Fecha de Cita",
-    d.fecha AS "Fecha de Diagnostico",
-    r.fecha AS "Fecha de Receta"
-FROM Paciente p, Enfermedad e, Medicamento m, Medico med, Especialidad esp, Cita c, Diagnostico d, Receta r, Diagnosticado diag, Contiene ctn, Tiene t
-WHERE p.dni = d.dniPaciente
-  AND d.id = diag.idDiagnostico
-  AND diag.idEnfermedad = e.id
-  AND p.dni = r.dniPaciente
-  AND r.id = ctn.idReceta
-  AND ctn.idMedicamento = m.id
-  AND d.idCita = c.id
-  AND c.dniMedico = med.dni
-  AND med.dni = t.dniMedico
-  AND t.idEspecialidad = esp.id
-  AND e.nombre = 'Enfermedad Especifica'
-  AND m.nombre = 'Medicamento Especifico'
-  AND esp.nombre = 'Especialidad Especifica'
-  AND c.fecha BETWEEN '2023-01-01' AND '2023-12-31'
-  AND d.fecha BETWEEN '2023-01-01' AND '2023-12-31'
-  AND r.fecha BETWEEN '2023-01-01' AND '2023-12-31'
-  AND m.fechaVencimiento > CURRENT_DATE
-  AND p.edad BETWEEN 20 AND 40
-  AND c.idConsultorio IN (SELECT id FROM Consultorio WHERE direccion LIKE '%ubicación específica%')
-  AND p.dni IN (SELECT dniPaciente FROM Sufre WHERE idEnfermedad = e.id)
-  AND med.dni IN (SELECT dniMedico FROM TrabajaMedico WHERE idConsultorio = c.idConsultorio)
-  AND EXISTS (SELECT 1 FROM Diagnosticado WHERE idDiagnostico = d.id AND idEnfermedad = e.id)
-  AND EXISTS (SELECT 1 FROM Contiene WHERE idReceta = r.id AND idMedicamento = m.id)
-ORDER BY c.fecha DESC;
---O
-SELECT
-    p.nombre AS "Nombre del Paciente",
-    p.apellido AS "Apellido del Paciente",
-    e.nombre AS "Enfermedad",
-    m.nombre AS "Medicamento",
-    med.nombre AS "Nombre del Medico",
-    med.apellido AS "Apellido del Medico",
-    esp.nombre AS "Especialidad del Medico",
-    c.fecha AS "Fecha de Cita",
-    d.fecha AS "Fecha de Diagnostico",
-    r.fecha AS "Fecha de Receta"
-FROM Paciente p
-         JOIN Diagnostico d ON p.dni = d.dniPaciente
-         JOIN Diagnosticado diag ON d.id = diag.idDiagnostico
-         JOIN Enfermedad e ON diag.idEnfermedad = e.id
-         JOIN Receta r ON p.dni = r.dniPaciente
-         JOIN Contiene ctn ON r.id = ctn.idReceta
-         JOIN Medicamento m ON ctn.idMedicamento = m.id
-         JOIN Cita c ON d.idCita = c.id
-         JOIN Medico med ON c.dniMedico = med.dni
-         JOIN Tiene t ON med.dni = t.dniMedico
-         JOIN Especialidad esp ON t.idEspecialidad = esp.id
-WHERE e.nombre = '' -- Nombre de la enfermedad
-  AND m.nombre = 'Medicamento Especifico' -- Nombre del medicamento
-  AND esp.nombre = 'Especialidad Especifica' -- Especialidad del médico
-  AND c.fecha BETWEEN '2023-01-01' AND '2023-12-31' -- Rango de fechas de la cita
-  AND d.fecha BETWEEN '2023-01-01' AND '2023-12-31' -- Rango de fechas del diagnóstico
-  AND r.fecha BETWEEN '2023-01-01' AND '2023-12-31' -- Rango de fechas de la receta
-  AND m.fechaVencimiento > CURRENT_DATE -- Que el medicamento no esté vencido
-  AND p.edad BETWEEN 20 AND 40 -- Rango de edad del paciente
-  AND c.idConsultorio IN (SELECT id FROM Consultorio WHERE direccion LIKE '%ubicación específica%') -- Consultorios en una ubicación específica
-ORDER BY c.fecha DESC;
+    COUNT(med.dni) AS "Cantidad de Consultas",
+    e.nombre AS "Nombre de la Enfermedad"
+FROM
+    Cita c
+        JOIN Medico med ON (c.dniMedico = med.dni)
+        JOIN Paciente p ON (c.dniPaciente = p.dni)
+        JOIN Diagnostico d ON (p.dni = d.dniPaciente)
+        JOIN Diagnosticado diag ON (d.id = diag.idDiagnostico)
+        JOIN Enfermedad e ON (diag.idEnfermedad = e.id)
+WHERE
+    e.nombre IN (
+        SELECT
+            nombre
+        FROM (
+                 SELECT
+                     e.nombre,
+                     COUNT(diag.idEnfermedad) AS total_diagnosticos
+                 FROM
+                     Enfermedad e
+                         JOIN Diagnosticado diag ON e.id = diag.idEnfermedad
+                         JOIN Diagnostico d ON diag.idDiagnostico = d.id
+                         JOIN Cita c ON d.idCita = c.id
+                 WHERE
+                     EXTRACT(YEAR FROM c.fecha) = '2022'
+                 GROUP BY
+                     e.nombre
+             ) AS Subconsulta
+        WHERE
+            total_diagnosticos > 5
+    )
+GROUP BY
+    med.dni, p.nombre, e.nombre
+ORDER BY
+    "Cantidad de Consultas" DESC;
+--Consulta para seleccionar los médicos que han diagnosticado
+-- más de 5 veces una enfermedad en el año 2022
