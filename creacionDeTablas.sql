@@ -66,13 +66,6 @@ ALTER TABLE Consultorio
     ADD CONSTRAINT pk_consultorio PRIMARY KEY (id);
 
 
-CREATE TABLE IF NOT EXISTS Enfermedad(
-    id VARCHAR(9),
-    nombre VARCHAR(50) NOT NULL,
-    descripcion VARCHAR(100) NOT NULL
-);
-ALTER TABLE Enfermedad
-    ADD CONSTRAINT pk_enfermedad PRIMARY KEY (id);
 
 CREATE TABLE IF NOT EXISTS Medicamento(
     id VARCHAR(9),
@@ -120,20 +113,6 @@ ALTER TABLE Receta
     ADD CONSTRAINT pk_receta PRIMARY KEY (id, dniMedico, dniPaciente, idConsultorio, idCita);
 
 
-CREATE TABLE IF NOT EXISTS Diagnostico(
-    id VARCHAR(9) ,
-    dniMedico VARCHAR(7) NOT NULL,
-    dniPaciente VARCHAR(7) NOT NULL,
-    idCita VARCHAR(9) NOT NULL,
-    idConsultorio VARCHAR(9) NOT NULL
-);
-ALTER TABLE Diagnostico
-    ADD CONSTRAINT fk_diagnostico_medico FOREIGN KEY (dniMedico) REFERENCES Medico(dni),
-    ADD CONSTRAINT fk_diagnostico_paciente FOREIGN KEY (dniPaciente) REFERENCES Paciente(dni),
-    ADD CONSTRAINT fk_diagnostico_cita FOREIGN KEY (idCita) REFERENCES Cita(id),
-    ADD CONSTRAINT fk_diagnostico_consultorio FOREIGN KEY (idConsultorio) REFERENCES Consultorio(id),
-    ADD CONSTRAINT pk_diagnostico PRIMARY KEY (id, dniMedico, dniPaciente, idCita, idConsultorio);
-
 CREATE TABLE IF NOT EXISTS Contiene (
     idReceta VARCHAR(9) NOT NULL,
     idMedicamento VARCHAR(9) NOT NULL,
@@ -150,24 +129,6 @@ ALTER TABLE Contiene
     ADD CONSTRAINT fk_contiene_cita FOREIGN KEY (idCita) REFERENCES Cita(id),
     ADD CONSTRAINT fk_contiene_paciente FOREIGN KEY (dniPaciente) REFERENCES Paciente(dni),
     ADD CONSTRAINT pk_contiene PRIMARY KEY (idReceta, idMedicamento, idConsultorio, idCita, dniPaciente, dniMedico);
-
-CREATE TABLE IF NOT EXISTS Diagnosticado (
-    idDiagnostico VARCHAR(9) NOT NULL,
-    idEnfermedad VARCHAR(9) NOT NULL,
-    idConsultorio VARCHAR(9) NOT NULL,
-    idPaciente VARCHAR(7) NOT NULL,
-    idMedico VARCHAR(7) NOT NULL,
-    idCita VARCHAR(9) NOT NULL
-
-);
-ALTER TABLE Diagnosticado
-    ADD CONSTRAINT fk_diagnosticado_diagnostico FOREIGN KEY (idDiagnostico) REFERENCES Diagnostico(id),
-    ADD CONSTRAINT fk_diagnosticado_enfermedad FOREIGN KEY (idEnfermedad) REFERENCES Enfermedad(id),
-    ADD CONSTRAINT fk_diagnosticado_consultorio FOREIGN KEY (idConsultorio) REFERENCES Consultorio(id),
-    ADD CONSTRAINT fk_diagnosticado_paciente FOREIGN KEY (idPaciente) REFERENCES Paciente(dni),
-    ADD CONSTRAINT fk_diagnosticado_medico FOREIGN KEY (idMedico) REFERENCES Medico(dni),
-    ADD CONSTRAINT fk_diagnosticado_cita FOREIGN KEY (idCita) REFERENCES Cita(id),
-    ADD CONSTRAINT pk_diagnosticado PRIMARY KEY (idDiagnostico, idEnfermedad, idConsultorio, idPaciente, idMedico,idCita);
 
 CREATE TABLE IF NOT EXISTS TrabajaEmpleado(
     dniEmpleado VARCHAR(7) NOT NULL,
