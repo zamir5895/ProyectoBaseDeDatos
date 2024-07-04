@@ -1,45 +1,52 @@
-
---Cuáles médicos han diagnosticado enfermedades que han sido diagnosticadas
--- más de cinco veces en el año 2022, cuántas consultas han realizado
--- y cuáles son los nombres de los pacientes y las enfermedades asociadas
---Ayuda a analizar los patrones de diagnóstico de enfermedades en el año 2022,
---y asi asignar asignar recursos eficientemente, evaluar la calidad de atención,
 SELECT
-    med.dni AS "DNI del Médico",
-    p.nombre AS "Nombre del Paciente",
-    COUNT(med.dni) AS "Cantidad de Consultas",
-    e.nombre AS "Nombre de la Enfermedad"
-FROM
-    Cita c
-        JOIN Medico med ON (c.dniMedico = med.dni)
-        JOIN Paciente p ON (c.dniPaciente = p.dni)
-        JOIN Diagnostico d ON (p.dni = d.dniPaciente)
-        JOIN Diagnosticado diag ON (d.id = diag.idDiagnostico)
-        JOIN Enfermedad e ON (diag.idEnfermedad = e.id)
-WHERE
-    e.nombre IN (
-        SELECT
-            nombre
-        FROM (
-                 SELECT
-                     e.nombre,
-                     COUNT(diag.idEnfermedad) AS total_diagnosticos
-                 FROM
-                     Enfermedad e
-                         JOIN Diagnosticado diag ON e.id = diag.idEnfermedad
-                         JOIN Diagnostico d ON diag.idDiagnostico = d.id
-                         JOIN Cita c ON d.idCita = c.id
-                 WHERE
-                     EXTRACT(YEAR FROM c.fecha) = '2022'
-                 GROUP BY
-                     e.nombre
-             ) AS Subconsulta
-        WHERE
-            total_diagnosticos > 5
-    )
-GROUP BY
-    med.dni, p.nombre, e.nombre
-ORDER BY
-    "Cantidad de Consultas" DESC;
---Consulta para seleccionar los médicos que han diagnosticado
--- más de 5 veces una enfermedad en el año 2022
+    tipo_medicamento,
+    (SUM(total_consumo) * 100.0 / (SELECT SUM(total_consumo)
+                                   FROM (
+                                            SELECT m.generico AS tipo_medicamento, COUNT(*) AS total_consumo
+                                            FROM (
+                                                     SELECT c.dniPaciente
+                                                     FROM Cita c
+                                                     WHERE c.fecha >= CURRENT_DATE - INTERVAL '10 years'
+                                                     GROUP BY c.dniPaciente, EXTRACT(YEAR FROM c.fecha)
+                                                     HAVING COUNT(*) > 5
+                                                 ) AS pacientes_filtrados
+                                                     JOIN (
+                                                SELECT r.dniPaciente, r.id AS receta_id
+                                                FROM Receta r
+                                            ) AS recetas ON pacientes_filtrados.dniPaciente = recetas.dniPaciente
+                                                     JOIN (
+                                                SELECT co.idReceta, co.idMedicamento
+                                                FROM Contiene co
+                                            ) AS contenidos ON recetas.receta_id = contenidos.idReceta
+                                                     JOIN (
+                                                SELECT m.id AS medicamento_id, m.generico
+                                                FROM Medicamento m
+                                            ) AS medicamentos ON contenidos.idMedicamento = medicamentos.medicamento_id
+                                            GROUP BY medicamentos.generico
+                                        ) AS subquery)) AS porcentaje_consumo
+FROM (
+         SELECT m.generico AS tipo_medicamento, COUNT(*) AS total_consumo
+         FROM (
+                  SELECT c.dniPaciente
+                  FROM Cita c
+                  WHERE c.fecha >= CURRENT_DATE - INTERVAL '10 years'
+                  GROUP BY c.dniPaciente, EXTRACT(YEAR FROM c.fecha)
+                  HAVING COUNT(*) > 5
+              ) AS pacientes_filtrados
+                  JOIN (
+             SELECT r.dniPaciente, r.id AS receta_id
+             FROM Receta r
+         ) AS recetas ON pacientes_filtrados.dniPaciente = recetas.dniPaciente
+                  JOIN (
+             SELECT co.idReceta, co.idMedicamento
+             FROM Contiene co
+         ) AS contenidos ON recetas.receta_id = contenidos.idReceta
+                  JOIN (
+             SELECT m.id AS medicamento_id, m.generico
+             FROM Medicamento m
+         ) AS medicamentos ON contenidos.idMedicamento = medicamentos.medicamento_id
+         GROUP BY medicamentos.generico
+     ) AS medicamentos_consumo
+GROUP BY tipo_medicamento;
+--"¿Cuál es el porcentaje de consumo de medicamentos genéricos
+-- versus no genéricos por pacientes que han tenido más de 5 citas por año en los últimos 10 años?"
