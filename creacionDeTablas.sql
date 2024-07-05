@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS Persona(
                                       nombre VARCHAR(50) NOT NULL,
                                       apellido VARCHAR(50) NOT NULL,
                                       edad INTEGER NOT NULL,
-                                      direccion VARCHAR(50) NOT NULL,
+                                      direccion VARCHAR(500) NOT NULL,
                                       telefono VARCHAR(9) NOT NULL,
                                       email VARCHAR(50) NOT NULL,
                                       fechaNacimiento DATE NOT NULL
@@ -38,8 +38,8 @@ ALTER TABLE Paciente
 
 CREATE TABLE IF NOT EXISTS Especialidad(
                                            id VARCHAR(9),
-                                           nombre VARCHAR(50) NOT NULL,
-                                           descripcion VARCHAR(50) NOT NULL
+                                           nombre VARCHAR(500) NOT NULL,
+                                           descripcion VARCHAR(600) NOT NULL
 );
 ALTER TABLE Especialidad
     ADD CONSTRAINT pk_especialidad PRIMARY KEY (id);
@@ -56,9 +56,7 @@ ALTER TABLE Tiene
 CREATE TABLE IF NOT EXISTS Consultorio(
                                           id VARCHAR(9) ,
                                           aforo INTEGER NOT NULL,
-                                          cantidadEmpleado INTEGER NOT NULL CHECK ( cantidadEmpleado >= 1),
-                                          cantidadMedicos INTEGER NOT NULL CHECK ( cantidadMedicos >= 1),
-                                          direccion VARCHAR(50) NOT NULL,
+                                          direccion VARCHAR(500) NOT NULL,
                                           telefono VARCHAR(9) NOT NULL
 );
 
@@ -70,8 +68,8 @@ ALTER TABLE Consultorio
 CREATE TABLE IF NOT EXISTS Medicamento(
                                           id VARCHAR(9),
                                           nombre VARCHAR(50) NOT NULL,
-                                          descripcion VARCHAR(50) NOT NULL,
-                                          instrucciones VARCHAR(50) NOT NULL,
+                                          descripcion VARCHAR(600) NOT NULL,
+                                          instrucciones VARCHAR(600) NOT NULL,
                                           nombreEmpresa VARCHAR(50) NOT NULL,
                                           generico BOOLEAN NOT NULL,
                                           fechaVencimiento DATE NOT NULL,
@@ -98,12 +96,11 @@ ALTER TABLE Cita
 
 CREATE TABLE IF NOT EXISTS Receta(
                                      id VARCHAR(9) ,
-                                     fecha DATE NOT NULL,
                                      dniMedico VARCHAR(7) NOT NULL,
                                      dniPaciente VARCHAR(7) NOT NULL,
                                      idConsultorio VARCHAR(9) NOT NULL,
                                      idCita VARCHAR(9) NOT NULL,
-                                     descripcion VARCHAR(50) NOT NULL
+                                     descripcion VARCHAR(600) NOT NULL
 );
 ALTER TABLE Receta
     ADD CONSTRAINT fk_key_compuesta FOREIGN KEY (dniMedico, dniPaciente, idConsultorio, idCita)
@@ -140,10 +137,12 @@ ALTER TABLE TrabajaEmpleado
     ADD CONSTRAINT pk_trabajaempleado PRIMARY KEY (dniEmpleado);
 
 CREATE TABLE IF NOT EXISTS TrabajaMedico(
-                                            dniMedico VARCHAR(7) NOT NULL,
-                                            idConsultorio VARCHAR(9) NOT NULL
+     dniMedico VARCHAR(7) NOT NULL,
+     idConsultorio VARCHAR(9) NOT NULL
 );
 ALTER TABLE TrabajaMedico
     ADD CONSTRAINT fk_trabajamedico_medico FOREIGN KEY (dniMedico) REFERENCES Medico(dni),
     ADD CONSTRAINT fk_trabajamedico_consultorio FOREIGN KEY (idConsultorio) REFERENCES Consultorio(id),
     ADD CONSTRAINT pk_trabajamedico PRIMARY KEY (dniMedico, idConsultorio);
+
+
