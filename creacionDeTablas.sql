@@ -95,12 +95,12 @@ ALTER TABLE Cita
     ADD CONSTRAINT pk_cita PRIMARY KEY (id, dniMedico, dniPaciente, idConsultorio);
 
 CREATE TABLE IF NOT EXISTS Receta(
-                                     id VARCHAR(9) ,
-                                     dniMedico VARCHAR(7) NOT NULL,
-                                     dniPaciente VARCHAR(7) NOT NULL,
-                                     idConsultorio VARCHAR(9) NOT NULL,
-                                     idCita VARCHAR(9) NOT NULL,
-                                     descripcion VARCHAR(600) NOT NULL
+     id VARCHAR(9) ,
+     dniMedico VARCHAR(7) NOT NULL,
+     dniPaciente VARCHAR(7) NOT NULL,
+     idConsultorio VARCHAR(9) NOT NULL,
+     idCita VARCHAR(9) NOT NULL,
+     descripcion VARCHAR(600) NOT NULL
 );
 ALTER TABLE Receta
     ADD CONSTRAINT fk_key_compuesta FOREIGN KEY (dniMedico, dniPaciente, idConsultorio, idCita)
